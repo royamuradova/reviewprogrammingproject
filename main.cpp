@@ -1,142 +1,89 @@
 #include <iostream>
-#include <random>
-#include <string>
+#include <iomanip>
 
 using namespace std;
 
-/*
-Rock-Paper-Scissors Game
----------------------------------
-This program allows a user to play Rock-Paper-Scissors against the computer.
-The user inputs their choice: "rock", "paper", or "scissors". The computer 
-randomly selects one of these choices. The program determines the winner 
-of each round, updates the score, and continues until the user decides to quit.
-
-How it works:
-1. The user is prompted to enter their choice.
-2. The computer generates a random choice.
-3. The winner of the round is determined.
-4. Scores are updated based on the winner.
-5. The game continues in a loop until the user enters "quit".
-6. The final winner is displayed based on total scores.
-*/
+// Constants
+const int NUM_STUDENTS = 3;  // Adjust based on actual number of students
+const int NUM_TESTS = 4;     // Adjust based on the number of tests
 
 // Function prototypes
-string getPlayerChoice();
-string getComputerChoice();
-string determineWinner(string player, string computer);
-void updateScores(string winner, int &playerScore, int &computerScore);
-void displayFinalWinner(int playerScore, int computerScore);
+void getStudentData(string names[], int scores[][NUM_TESTS], int numStudents);
+void calculateAverages(int scores[][NUM_TESTS], double averages[], int numStudents);
+void assignLetterGrades(double averages[], char grades[], int numStudents);
+void displayResults(string names[], double averages[], char grades[], int numStudents);
 
 int main() {
-    int playerScore = 0, computerScore = 0;
-    string playerChoice, computerChoice, winner;
+    string studentNames[NUM_STUDENTS];
+    int scores[NUM_STUDENTS][NUM_TESTS];
+    double averages[NUM_STUDENTS];
+    char grades[NUM_STUDENTS];
 
-    cout << "Welcome to Rock, Paper, Scissors!" << endl;
+    // Get student data
+    getStudentData(studentNames, scores, NUM_STUDENTS);
 
-    while (true) {
-        playerChoice = getPlayerChoice();
+    // Calculate averages
+    calculateAverages(scores, averages, NUM_STUDENTS);
 
-        if (playerChoice == "quit") {
-            break; // Exit game loop
-        }
+    // Assign letter grades
+    assignLetterGrades(averages, grades, NUM_STUDENTS);
 
-        computerChoice = getComputerChoice();
-        cout << "Computer chose: " << computerChoice << endl;
+    // Display results
+    displayResults(studentNames, averages, grades, NUM_STUDENTS);
 
-        winner = determineWinner(playerChoice, computerChoice);
-        updateScores(winner, playerScore, computerScore);
-
-        cout << "Current Score - You: " << playerScore << " | Computer: " << computerScore << endl;
-    }
-
-    displayFinalWinner(playerScore, computerScore);
     return 0;
 }
 
-// Function to get the player's choice
-// Input: None (user is prompted to enter a choice)
-// Preconditions: User must enter "rock", "paper", "scissors", or "quit" (case insensitive)
-// Postconditions: Returns a valid user choice as a lowercase string
-string getPlayerChoice() {
-    string choice;
-    while (true) {
-        cout << "Enter rock, paper, scissors, or quit: ";
-        cin >> choice;
+// Function to get student names and test scores
+void getStudentData(string names[], int scores[][NUM_TESTS], int numStudents) {
+    for (int i = 0; i < numStudents; i++) {
+        cout << "Enter student " << i + 1 << " name: ";
+        cin >> names[i];
 
-        // Convert input to lowercase for consistency
-        for (char &c : choice) {
-            c = tolower(c);
+        cout << "Enter " << NUM_TESTS << " test scores for " << names[i] << ": ";
+        for (int j = 0; j < NUM_TESTS; j++) {
+            cin >> scores[i][j];
         }
+    }
+}
 
-        if (choice == "rock" || choice == "paper" || choice == "scissors" || choice == "quit") {
-            return choice;
+// Function to calculate student averages
+void calculateAverages(int scores[][NUM_TESTS], double averages[], int numStudents) {
+    for (int i = 0; i < numStudents; i++) {
+        int sum = 0;
+        for (int j = 0; j < NUM_TESTS; j++) {
+            sum += scores[i][j];
+        }
+        averages[i] = static_cast<double>(sum) / NUM_TESTS;
+    }
+}
+
+// Function to assign letter grades based on average scores
+void assignLetterGrades(double averages[], char grades[], int numStudents) {
+    for (int i = 0; i < numStudents; i++) {
+        if (averages[i] >= 90) {
+            grades[i] = 'A';
+        } else if (averages[i] >= 80) {
+            grades[i] = 'B';
+        } else if (averages[i] >= 70) {
+            grades[i] = 'C';
+        } else if (averages[i] >= 60) {
+            grades[i] = 'D';
         } else {
-            cout << "Invalid input! Please enter rock, paper, scissors, or quit." << endl;
+            grades[i] = 'F';
         }
     }
 }
 
-// Function to get a random computer choice
-// Input: None
-// Preconditions: None
-// Postconditions: Returns "rock", "paper", or "scissors" as a randomly chosen string
-string getComputerChoice() {
-    random_device rd;
-    mt19937 gen(rd());
-    uniform_int_distribution<int> dist(1, 3);
+// Function to display student names, averages, and letter grades
+void displayResults(string names[], double averages[], char grades[], int numStudents) {
+    cout << "\nGrade Book Results:\n";
+    cout << setw(15) << "Name" << setw(10) << "Average" << setw(10) << "Grade" << endl;
+    cout << "-------------------------------------" << endl;
 
-    int randomNum = dist(gen);
-    if (randomNum == 1) return "rock";
-    if (randomNum == 2) return "paper";
-    return "scissors";
-}
-
-// Function to determine the winner
-// Input: Player's choice and computer's choice as strings
-// Preconditions: Both inputs must be "rock", "paper", or "scissors"
-// Postconditions: Returns "player" if player wins, "computer" if computer wins, and "draw" if it's a tie
-string determineWinner(string player, string computer) {
-    if (player == computer) {
-        cout << "It's a draw!" << endl;
-        return "draw";
-    }
-
-    if ((player == "rock" && computer == "scissors") ||
-        (player == "scissors" && computer == "paper") ||
-        (player == "paper" && computer == "rock")) {
-        cout << "You win this round!" << endl;
-        return "player";
-    } else {
-        cout << "Computer wins this round!" << endl;
-        return "computer";
-    }
-}
-
-// Function to update the score based on the round winner
-// Input: The winner as a string, and references to player and computer scores
-// Preconditions: winner must be either "player", "computer", or "draw"
-// Postconditions: Updates the score by incrementing the appropriate player's count
-void updateScores(string winner, int &playerScore, int &computerScore) {
-    if (winner == "player") {
-        playerScore++;
-    } else if (winner == "computer") {
-        computerScore++;
-    }
-}
-
-// Function to display the final winner at the end of the game
-// Input: Player's total score and computer's total score
-// Preconditions: None
-// Postconditions: Displays the final score and announces the tournament winner
-void displayFinalWinner(int playerScore, int computerScore) {
-    cout << "\nFinal Score - You: " << playerScore << " | Computer: " << computerScore << endl;
-
-    if (playerScore > computerScore) {
-        cout << "Congratulations! You won the tournament!" << endl;
-    } else if (computerScore > playerScore) {
-        cout << "Computer wins the tournament! Better luck next time!" << endl;
-    } else {
-        cout << "The tournament ended in a draw!" << endl;
+    for (int i = 0; i < numStudents; i++) {
+        cout << setw(15) << names[i] 
+             << setw(10) << fixed << setprecision(2) << averages[i] 
+             << setw(10) << grades[i] << endl;
     }
 }
